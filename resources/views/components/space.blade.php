@@ -3,7 +3,7 @@
             <!-- flexbox bootstrap - memisahkan menu kesebelah paling kanan dan kiri -->
             <div class="d-flex justify-content-between mb-3">
                 <div id="create-space">
-                    <a href="#" class="btn btn-primary">Pin!</a>
+                    <a href="{{ route('space.create') }}" class="btn btn-primary">Pin!</a>
                 </div>
 
                 <div id="view-space">
