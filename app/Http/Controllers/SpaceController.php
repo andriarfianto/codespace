@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Space;
 use Illuminate\Http\Request;
 
 class SpaceController extends Controller
@@ -18,7 +19,8 @@ class SpaceController extends Controller
      */
     public function index()
     {
-        return view('pages.space.index');
+        $spaces = Space::orderBy('created_at', 'DESC')->paginate(4);
+        return view('pages.space.index', compact('spaces'));
     }
 
     /**
@@ -29,6 +31,11 @@ class SpaceController extends Controller
     public function create()
     {
         return view('pages.space.create');
+    }
+
+    public function browse()
+    {
+        return view('pages.space.browse');
     }
 
     /**
@@ -71,7 +78,11 @@ class SpaceController extends Controller
      */
     public function edit($id)
     {
-        //
+        $space = Space::findOrFail($id);
+        if ($space->user_id != request()->user()->id) {
+            return redirect()->back();
+        }
+        return view('pages.space.edit', compact('space'));
     }
 
     /**
@@ -83,7 +94,20 @@ class SpaceController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $space = Space::findOrFail($id);
+        if ($space->user_id != request()->user()->id) {
+            return redirect()->back();
+        }
+        $this->validate($request, [
+            'title'       => ['required', 'min:3'],
+            'address'     => ['required', 'min:5'],
+            'description' => ['required', 'min:10'],
+            'latitude'    => ['required'],
+            'longitude'   => ['required'],
+        ]);
+        $space->update($request->all());
+        return redirect()->route('space.index')->with('status', 'Space updated!');
+
     }
 
     /**
@@ -94,6 +118,15 @@ class SpaceController extends Controller
      */
     public function destroy($id)
     {
-        //
+        // Check data space ada atau tidak
+        $space = Space::findOrFail($id);
+
+        // Jika hak akses buka user tersebut
+        // Maka diredirect ke halaman sebelumnya
+        if ($space->user_id != request()->user()->id) {
+            return redirect()->back();
+        }
+        $space->delete();
+        return redirect()->route('space.index')->with('status', 'Space deleted!');
     }
 }
